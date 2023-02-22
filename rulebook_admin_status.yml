@@ -1,0 +1,16 @@
+---
+- name: Remediate incorrectly shutdown ports
+  hosts: ios
+
+  sources:
+    - ansible.eda.kafka:
+        host: "{{ hostvars.util.ansible_host }}"
+        port: 9092
+        topic: ansiblenetwork
+
+  rules:
+    - name: Apply correct interface status
+      condition: event.fields.admin_status == "if-state-down"
+      action:
+        run_playbook:
+          name: playbook_interfaces.yml

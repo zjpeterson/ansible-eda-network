@@ -1,0 +1,34 @@
+---
+- name: Setup Telegraf
+  hosts: util
+  gather_facts: false
+  become: true
+
+  handlers:
+    - name: Restart Telegraf
+      ansible.builtin.service:
+        name: telegraf
+        state: restarted
+
+  tasks:
+    - name: Install influxdata repo
+      ansible.builtin.copy:
+        content: |
+          [influxdata]
+          name = InfluxData Repository - Stable
+          baseurl = https://repos.influxdata.com/stable/$basearch/main
+          enabled = 1
+          gpgcheck = 1
+          gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+        dest: /etc/yum.repos.d/influxdata.repo
+
+    - name: Install Telegraf
+      ansible.builtin.dnf:
+        name: telegraf
+        state: present
+
+    - name: Apply Telegraf configuration
+      ansible.builtin.template:
+        src: telegraf.conf.j2
+        dest: /etc/telegraf/telegraf.conf
+      notify: Restart Telegraf

@@ -1,0 +1,10 @@
+---
+- name: Enable model-driven telemetry
+  hosts: ios
+  gather_facts: false
+
+  tasks:
+    - name: Apply interface resource
+      cisco.ios.interfaces:
+        state: merged
+        config: "{{ interfaces }}"

@@ -1,0 +1,12 @@
+---
+interfaces:
+  - name: GigabitEthernet1
+    description: Management
+    enabled: true
+  - name: GigabitEthernet2
+    description: Not important
+    enabled: false
+  - name: GigabitEthernet3
+    description: Important
+    enabled: true
+  

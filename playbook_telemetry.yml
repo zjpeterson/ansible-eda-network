@@ -1,0 +1,26 @@
+---
+- name: Enable model-driven telemetry
+  hosts: ios
+  gather_facts: false
+
+  vars:
+    subscriptions:
+      - id: 101
+        xpath: /interfaces/interface/admin-status
+        policy: on-change
+
+  tasks:
+    - name: Ensure YANG enabled
+      cisco.ios.config:
+        lines: netconf-yang
+
+    - name: Ensure telemetry subscriptions
+      cisco.ios.config:
+        parents: telemetry ietf subscription {{ item.id }}
+        lines:
+          - stream yang-push
+          - encoding encode-kvgpb
+          - filter xpath {{ item.xpath }}
+          - update-policy {{ item.policy }}
+          - receiver ip address {{ hostvars.util.ansible_host }} {{ telegraf_port }} protocol grpc-tcp
+      loop: "{{ subscriptions }}"

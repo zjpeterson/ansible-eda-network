@@ -1,0 +1,51 @@
+---
+- name: Setup Kafka
+  hosts: util
+  gather_facts: false
+  become: true
+
+  vars:
+    kafka_url: https://dlcdn.apache.org/kafka/3.4.0/kafka_2.13-3.4.0.tgz
+
+  tasks:
+    - name: Get Kafka tarball
+      ansible.builtin.get_url:
+        url: "{{ kafka_url }}"
+        dest: /tmp/kafka.tgz
+
+    - name: Untar Kafka tarball
+      ansible.builtin.unarchive:
+        src: /tmp/kafka.tgz
+        dest: /usr/local/
+        remote_src: true
+        creates: /usr/local/kafka
+        list_files: true
+      register: tar_files
+
+    - name: Rename Kafka directory
+      ansible.builtin.command:
+        cmd: mv /usr/local/{{ tar_files.files.0 | default('kafka') }} /usr/local/kafka
+        creates: /usr/local/kafka
+
+    - name: Install Java JDK
+      ansible.builtin.dnf:
+        name: java-11-openjdk
+        state: present
+
+    - name: Create services
+      ansible.builtin.copy:
+        content: "{{ lookup('file', item + '.service') }}"
+        dest: /etc/systemd/system/{{ item }}.service
+      loop:
+        - zookeeper
+        - kafka
+
+    - name: Setup services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        daemon_reload: true
+        enabled: true
+        state: started
+      loop:
+        - zookeeper
+        - kafka
