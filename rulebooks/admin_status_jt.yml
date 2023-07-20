@@ -1,0 +1,17 @@
+---
+- name: Remediate incorrectly shutdown ports
+  hosts: ios
+
+  sources:
+    - ansible.eda.kafka:
+        host: util.zach.lab
+        port: 9092
+        topic: ansiblenetwork
+
+  rules:
+    - name: Apply correct interface status
+      condition: event.fields.admin_status == "if-state-down"
+      action:
+        run_job_template:
+          name: EDA Interface Remediation
+          organization: Network
