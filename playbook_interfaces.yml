@@ -1,5 +1,5 @@
 ---
-- name: Enable model-driven telemetry
+- name: Apply network resources
   hosts: ios
   gather_facts: false
 
